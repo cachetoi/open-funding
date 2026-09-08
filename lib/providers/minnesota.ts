@@ -1,0 +1,9 @@
+import type { FundingProvider, Opportunity, ProviderResult } from '@/lib/opportunity';
+import { absoluteUrl, cleanHtml, dateFromText, fetchHtml, finish, hash } from './webSource';
+const URL='https://mn.gov/grants/find-a-grant/'; const ORIGIN='https://mn.gov';
+export const minnesotaProvider:FundingProvider={name:'Minnesota Grants',async search(query,limit):Promise<ProviderResult>{try{
+ const html=await fetchHtml(URL);const q=query.toLowerCase();const checked=new Date().toISOString();const rows:Opportunity[]=[];const seen=new Set<string>();
+ const links=[...html.matchAll(/<a\b[^>]*href=["']([^"']+)["'][^>]*>([\s\S]*?)<\/a>/gi)];
+ for(const m of links){const title=cleanHtml(m[2]);if(title.length<10||title.length>220||!/grant|fund|opportunit|program|request for proposals?|rfp/i.test(title))continue;const href=absoluteUrl(m[1],ORIGIN);if(seen.has(href)||!href.includes('mn.gov'))continue;seen.add(href);const around=cleanHtml(html.slice(Math.max(0,(m.index||0)-900),Math.min(html.length,(m.index||0)+1800)));if(q&&!`${title} ${around}`.toLowerCase().includes(q))continue;const deadline=dateFromText(around);rows.push(finish({id:`mn-${hash(href+title)}`,providerId:href,source:'Minnesota Grants',sourceKind:'web',sourceTier:'state',title,funder:'State of Minnesota',status:'Listed',category:'State',categories:['State'],eligibility:[],deadline,deadlineType:deadline?'fixed':'unknown',geography:'Minnesota',url:href,description:around.slice(0,500)||'Minnesota state grant opportunity.',lastChecked:checked,detailAvailable:false}));if(rows.length>=limit)break}
+ return{provider:'Minnesota Grants',opportunities:rows,total:rows.length,note:'Official statewide grant-opportunity search'};
+}catch(error){return{provider:'Minnesota Grants',opportunities:[],error:error instanceof Error?error.message:String(error)}}}};
