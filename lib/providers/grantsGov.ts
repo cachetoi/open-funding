@@ -60,7 +60,7 @@ export const grantsGovProvider: FundingProvider = {
         lastChecked, detailAvailable: true
       }));
       opportunities.forEach((item) => { item.dataCompleteness = completeness(item); });
-      return { provider: 'Grants.gov', opportunities, total, note: `All ${opportunities.length.toLocaleString()} currently posted/forecasted matches loaded from paginated API` };
+      return { provider: 'Grants.gov', opportunities, total, coverage: 'complete', retrievalMethod: 'api', pagesFetched: pages.length, note: `All ${opportunities.length.toLocaleString()} currently posted/forecasted matches loaded from paginated API` };
     } catch (error) {
       return { provider: 'Grants.gov', opportunities: [], error: String(error) };
     }

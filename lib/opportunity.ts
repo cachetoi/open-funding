@@ -61,6 +61,9 @@ export type ProviderResult = {
   total?: number;
   error?: string;
   note?: string;
+  coverage?: 'complete' | 'partial' | 'unknown';
+  retrievalMethod?: 'api' | 'rss' | 'html' | 'dataset';
+  pagesFetched?: number;
 };
 
 export interface FundingProvider {

@@ -5,8 +5,8 @@ import { FormEvent, useEffect, useMemo, useState } from 'react';
 import FundingCard, { DisplayField, FundingResult } from '@/components/FundingCard';
 import ThemeControls from '@/components/ThemeControls';
 
-type SourceStatus={name:string;returned:number;total:number;ok:boolean;error?:string;note?:string};
-type StoreStats={count:number;updatedAt:string;path:string};
+type SourceStatus={name:string;returned:number;total:number;ok:boolean;error?:string;note?:string;coverage?:'complete'|'partial'|'unknown';retrievalMethod?:string;pagesFetched?:number};
+type StoreStats={count:number;updatedAt:string;backend?:'postgres'|'live-fallback';path?:string};
 type FacetKey='source'|'tier'|'status'|'geography'|'category'|'deadline'|'topic'|'population'|'use';
 
 const DEFAULT_FIELDS:DisplayField[]=['award','eligibility','deadline','geography','posted','type','costShare','sourceTier'];
@@ -136,12 +136,12 @@ export default function Home(){
       <nav className="nav" aria-label="Primary"><Link className="brand" href="/">OpenFunding</Link><div className="navRight"><a className="navActive" href="#results">Explore funding</a><button type="button" className="navSave" onClick={()=>setSavedOnly(!savedOnly)} aria-pressed={savedOnly}>♥ Saved {saved.length}</button><a href="#sources">Sources</a><Link href="/about">About</Link><ThemeControls/></div></nav>
       <div className="heroInner"><span className="pill">Free · no login required</span><h1 id="page-title">Find funding without knowing where to look.</h1><p className="lede">Search public funding across disconnected systems, then narrow it by what actually matters to you.</p>
         <form className="searchBox" onSubmit={onSubmit} role="search"><label className="srOnly" htmlFor="funding-search">Search funding opportunities</label><input id="funding-search" value={query} onChange={e=>setQuery(e.target.value)} placeholder="Try: youth mental health, climate, rural, STEM…"/><button type="submit">Search funding</button></form>
-        <div className="heroStats" aria-label="OpenFunding summary"><span><strong>{availableSources.length||11}</strong> connected adapters</span><span><strong>{reportedTotal.toLocaleString()}</strong> matches reported by sources</span><span><strong>{store?.count||0}</strong> opportunities remembered locally</span><span><strong>No login</strong> to search or save</span></div>
+        <div className="heroStats" aria-label="OpenFunding summary"><span><strong>{availableSources.length||11}</strong> connected adapters</span><span><strong>{reportedTotal.toLocaleString()}</strong> matches reported by sources</span><span><strong>{store?.count||results.length}</strong> opportunities indexed</span><span><strong>No login</strong> to search or save</span></div>
       </div>
     </section>
 
     <section className="resultsWrap" id="results" aria-labelledby="results-heading">
-      <div className="resultsHeader"><div><span className="eyebrow">Unified results</span><h2 id="results-heading">{loading?'Searching sources…':`${filtered.length} opportunities shown`}</h2><p className="muted" aria-live="polite" aria-atomic="true">{results.length} loaded locally · {reportedTotal.toLocaleString()} reported at connected sources · {activeFilterCount} active filters · {saved.length} saved</p></div>
+      <div className="resultsHeader"><div><span className="eyebrow">Unified results</span><h2 id="results-heading">{loading?'Searching sources…':`${filtered.length} opportunities shown`}</h2><p className="muted" aria-live="polite" aria-atomic="true">{results.length} indexed opportunities · {reportedTotal.toLocaleString()} reported at connected sources · {activeFilterCount} active filters · {saved.length} saved</p></div>
         <div className="headerActions"><label className="sortControl">Sort<select value={sort} onChange={e=>setSort(e.target.value)}><option value="deadline">Deadline: soonest</option><option value="newest">Newest posted</option><option value="award-high">Award: high to low</option><option value="award-low">Award: low to high</option></select></label>
           <div className="densityToggle" role="group" aria-label="Result density"><button className={density==='comfortable'?'active':''} aria-pressed={density==='comfortable'} onClick={()=>setDensity('comfortable')} type="button">Comfortable</button><button className={density==='compact'?'active':''} aria-pressed={density==='compact'} onClick={()=>setDensity('compact')} type="button">Compact</button></div>
           <button type="button" className="secondaryButton" aria-expanded={showCustomize} aria-controls="customize-results" onClick={()=>setShowCustomize(!showCustomize)}>Customize</button>
